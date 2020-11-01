@@ -22,11 +22,11 @@ Finally, you should import your new file in [modular_main](https://github.com/Fe
 ## Example runs
 First you have to generate the datasets using  [create_functions_datasets](https://github.com/FerranAlet/modular-metalearning/blob/master/create_functions_datasets.py). For instance to create the functions dataset:
 ```
-python create_functions_datasets.py --mode sum --not_alone --out_file sums.hdf5
+python3 create_functions_datasets.py --mode sum --not_alone --out_file sums.hdf5
 ```
 To create the sines dataset:
 ```
-python create_functions_datasets.py --mode sines --out_file sines.hdf5
+python3 create_functions_datasets.py --mode sines --out_file sines.hdf5
 ```
 
 To create the two dim sines dataset:
@@ -38,11 +38,15 @@ The file has a couple flags to customize how many elements per dataset and how m
 Then you run [modular_main](https://github.com/FerranAlet/modular-metalearning/blob/master/modular_main.py), which relies on the class defined in the [modular_metalearning](https://github.com/FerranAlet/modular-metalearning/blob/master/modular_metalearning.py) file.
 For example to run BounceGrad in the sums dataset:
 ```
-python modular_main.py --type_modules affine-1-16-16-1,affine-1-16-1 --num_modules 10,10 --composer sum-2 --meta_lr 0.003 --plot_name BounceGrad --limit_data 80 --optimization_steps 3000 --split_by_file --meta_split 90,10,0 --data_split 20,80,0 --data_desc HDF5@sums.hdf5 --meta_batch_size 32
+python3 modular_main.py --type_modules affine-1-16-16-1,affine-1-16-1 --num_modules 10,10 --composer sum-2 --meta_lr 0.003 --plot_name BounceGrad --limit_data 80 --optimization_steps 3000 --split_by_file --meta_split 90,10,0 --data_split 20,80,0 --data_desc HDF5@sums.hdf5 --meta_batch_size 32
 ```
 or to run MAML in the sines dataset:
 ```
-python modular_main.py --type_modules affine-1-64-64-1 --num_modules 1 --composer functionComposition-1 --meta_lr 0.001 --plot_name MAML --limit_data 80 --optimization_steps 5000 --split_by_file --meta_split 90,10,0 --data_split 20,80,0 --data_desc HDF5@sines.hdf5 --meta_batch_size 16 --max_datasets 300 --MAML --MAML_step_size 0.1
+python3 modular_main.py --type_modules affine-1-64-64-1 --num_modules 1 --composer functionComposition-1 --meta_lr 0.001 --plot_name MAML --limit_data 80 --optimization_steps 5000 --split_by_file --meta_split 90,10,0 --data_split 20,80,0 --data_desc HDF5@sines.hdf5 --meta_batch_size 16 --max_datasets 300 --MAML --MAML_step_size 0.1
+```
+or to run MAML in the two-dimensional sines dataset:
+```
+python3 modular_main.py --type_modules affine-1-64-64-1,affine-1-64-64-1 --num_modules 1,1 --composer two_dim_function_composition-2 --meta_lr 0.001 --plot_name MAML --limit_data 80 --optimization_steps 5000 --split_by_file --meta_split 90,10,0 --data_split 20,80,0 --data_desc HDF5@sines.hdf5 --meta_batch_size 16 --max_datasets 300 --MAML --MAML_step_size 0.1
 ```
 ## Algorithm options
 You can run either of the 4 algorithms described in the paper:
