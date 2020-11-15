@@ -6,6 +6,7 @@ from modular_metalearning import BounceGrad
 from sum_composer import Sum_Structure
 from functioncomposition_composer import FunctionComposition_Structure
 from multi_dimension_composer import multi_dimension_Structure
+from concat_composer import ConcatStructure
 
 def main():
   #########
@@ -115,6 +116,8 @@ def main():
     [composer, args.structure_size] = composer.split('-')
     args.structure_size=int(args.structure_size)
     S = multi_dimension_Structure(args=args)
+  elif composer.startswith("concat_composition"):
+    S = ConcatStructure(args=args)
   else:
     raise NotImplementedError
 

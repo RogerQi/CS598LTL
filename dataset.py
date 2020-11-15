@@ -8,6 +8,7 @@ import copy
 import h5py
 import numpy as np
 import random
+from pdb import set_trace
 
 #Default parameters
 SEED = 2
@@ -106,14 +107,15 @@ class MetaDataset(object):
     at the same time
     '''
     # Check all inputs and all outputs have the same size
-    inp_shape = self.MTRAIN[0].TrainInput.shape[1]
-    out_shape = self.MTRAIN[0].TrainOutput.shape[1]
-    for dataset in self.ALL:
-      assert dataset.TrainInput.shape[1] == inp_shape
-      assert dataset.TestOutput.shape[1] == out_shape
+    #set_trace()
+    #inp_shape = self.MTRAIN[0].TrainInput.shape[1]
+    #out_shape = self.MTRAIN[0].TrainOutput.shape[1]
+    #for dataset in self.ALL:
+    #  assert dataset.TrainInput.shape[1] == inp_shape
+    #  assert dataset.TestOutput.shape[1] == out_shape
     # Compute mean and std
     ALL_IN = np.concatenate([dataset.ValInput for dataset in self.MVAL] , 0)
-    ALL_OUT = np.concatenate([dataset.ValOutput for dataset in self.MVAL],0)
+    ALL_OUT = np.concatenate([dataset.ValOutput.flatten() for dataset in self.MVAL])
     self.input_mean = np.mean(ALL_IN, 0)
     self.input_std = np.maximum(EPS, np.std(ALL_IN, 0))
     self.output_mean = np.mean(ALL_OUT, 0)
@@ -124,7 +126,7 @@ class MetaDataset(object):
     print('MVAL Output std: ', self.output_std)
 
     ALL_IN = np.concatenate([dataset.ValInput for dataset in self.MTRAIN] , 0)
-    ALL_OUT = np.concatenate([dataset.ValOutput for dataset in self.MTRAIN],0)
+    ALL_OUT = np.concatenate([dataset.ValOutput.flatten() for dataset in self.MTRAIN])
     self.input_mean = np.mean(ALL_IN, 0)
     self.input_std = np.maximum(EPS, np.std(ALL_IN, 0))
     self.output_mean = np.mean(ALL_OUT, 0)

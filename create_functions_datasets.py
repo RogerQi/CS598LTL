@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import argparse
 from IPython import embed
 import numpy as np
+from pdb import set_trace
 
 OPS = {
     'abs': lambda x,y : np.abs(x),
@@ -73,6 +74,20 @@ def main(args):
       DATA[ori_name+'-OUT'] = y
       ax_counter = maybe_add_plot(ax_counter, x,y)
 
+  def run_sines_n_dim(args):
+    ax_counter = 0
+    for dataset in range(args.meta_datasets):
+      dim = np.random.random_integers(low = args.min_dim, high = args.max_dim)
+      freqs = np.random.uniform(low = 0.1, high = 5.0, size=dim)
+      phases = np.random.uniform(low=0., high = np.pi, size=dim)
+      ys = [special_sine(x, freq, phase) for freq, phase in zip(freqs, phases)]
+      y = np.hstack(ys)
+      ori_name = "_".join(["f{:.6f}_p{:.6f}".format(freq, phase).replace(".", "d")
+          for freq, phase in zip(freqs, phases)])
+      DATA[ori_name+'-IN'] = x
+      DATA[ori_name+'-OUT'] = y
+      ax_counter = maybe_add_plot(ax_counter, x,y)
+
   def run_sines_finn_etal(args):
     # As described in https://arxiv.org/abs/1703.03400
     # Varies amplitude and phase
@@ -113,9 +128,11 @@ def main(args):
   elif args.mode == 'sines-finn': run_sines_finn_etal(args)
   elif args.mode == 'sum': run_functions(args)
   elif args.mode == 'two_dim_sines': run_sines_two_dim(args)
+  elif args.mode == "n_dim_sines" : run_sines_n_dim(args)
   else: raise NotImplementedError
 
   print(len(DATA))
+  set_trace()
   plt.show()
 
   # Plots 2 images visualizing a few sumed functions.
@@ -170,6 +187,10 @@ if __name__ == '__main__':
       default = 1000, help='number of metadatasets for sines datasets')
   parser.add_argument('--out_file', dest='out_file', default='out_file.hdf5',
       help='directory with bvh files')
+  parser.add_argument("--min_dim", dest="min_dim", type=int, default=1,
+          help="Minimimum dimension for n_dim sines mode.")
+  parser.add_argument("--max_dim", dest="max_dim", type=int, default=4,
+          help="Maximum dimension for n_dim sines mode.")
   args = parser.parse_args()
   main(args)
 
