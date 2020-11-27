@@ -30,6 +30,16 @@ class VariableDimensionStructure(Structure):
               T.MVAL[i].original_input_shape)
       self.ValStructures[i]['original_output_shape'] = output_shape
 
+  def initialize_test_structures(self, test_data):
+    self.TestStructures = [None for _ in test_data]
+    for i in range(len(self.TestStructures)):
+      output_shape = test_data[i].original_output_shape
+      self.TestStructures[i] = self.initialize_structure(dimension=output_shape[1])
+      self.TestStructures[i]['original_input_shape'] = (
+              test_data[i].original_input_shape)
+      self.TestStructures[i]['original_output_shape'] = (
+              test_data[i].original_output_shape)
+
   def default_propose_new_structure(self, new_structure):
     pos = np.random.randint(len(new_structure['modules']))
     act_type = np.random.randint(self.num_types)

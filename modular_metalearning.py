@@ -2,6 +2,7 @@ from pylab import rcParams
 rcParams['figure.figsize'] = 15, 15
 import json
 import torch
+from pdb import set_trace
 import torch.nn.functional as F
 from torch import nn
 from torch.optim.lr_scheduler import ReduceLROnPlateau
@@ -242,7 +243,8 @@ class BounceGrad(object):
     # They weren't used in the paper, but may be in the future,
     # as ensembles generally perform better than any single structure.
     self.answers_running_score = 1e-5
-    self.ans_eps = 1e-1 #3e-2
+    #self.ans_eps = 1e-1 #3e-2
+    self.ans_eps = 1.0
     self.MTrainAnswers = [[None, None]
         for _ in range(self.mtrain_copies*len(self.T.MTRAIN))]
     self.MValAnswers = [[None, None]
@@ -383,6 +385,64 @@ class BounceGrad(object):
           original_train_ans.data.cpu().numpy(),
           original_val_ans.data.cpu().numpy(), MAML_g)
 
+  def run_test(self, sa_steps):
+    test_data = self.T.MVAL
+    self.SA_running_acc_rate = 1e-9 #initial counters for Simulated Annealing
+    self.SA_running_factor = 1e-9 #normalizing constant
+    temp = np.exp(self.initial_temp) #temperature in the SA formula
+    temp_change = 1.1
+    self.S.initialize_test_structures(test_data)
+
+    self.MTestAnswers = [[None, None] for _ in range(len(test_data))]
+    self.OldMTestAnswers = [[None, None] for _ in range(len(test_data))]
+    CosDist = nn.CosineSimilarity(dim=1)
+
+    for step in Tqdm(range(sa_steps)):
+      self.step = step
+      acc_rate = np.exp(self.initial_acc-5.*step/sa_steps)
+      if self.SA_running_acc_rate/self.SA_running_factor < acc_rate:
+        temp *= temp_change
+      else: temp /= temp_change
+
+      self.current_train = []
+      self.current_val = []
+      self.MTest_norm_diff = []
+      self.MTest_cos_diff = []
+      if self.MAML: maml_gradients = []
+      for i, structure in Tqdm(enumerate(self.S.TestStructures)):
+        dataset = test_data[i%len(test_data)] #multiple structures per dataset
+        #Update structure
+        self.S.update_structure(self.S.TestStructures[i], step=self.step)
+        #######################
+        # Simulated Annealing #
+        #######################
+        (self.S.TestStructures[i], train_loss, val_loss, train_ans, val_ans,
+            MAML_g) = self.bounce(structure, dataset, temp, do_grad=True)
+        self.current_train.append(train_loss.data.cpu().numpy())
+        self.current_val.append(val_loss.data.cpu().numpy())
+        if self.MTestAnswers[i][0] is None:
+          self.MTestAnswers[i][0] = train_ans * self.ans_eps
+        else: self.MTestAnswers[i][0] = (
+            (1-self.ans_eps)*self.MTestAnswers[i][0] +
+            train_ans * self.ans_eps)
+        if self.MTestAnswers[i][1] is None:
+          self.MTestAnswers[i][1] = val_ans * self.ans_eps
+        else:
+          self.MTestAnswers[i][1] = ((1-self.ans_eps)
+              *self.MTestAnswers[i][1] + val_ans*self.ans_eps)
+        if self.OldMTestAnswers[i][0] is not None:
+          self.MTest_norm_diff.append(
+              np.mean(np.linalg.norm(
+                self.OldMTestAnswers[i][0]-train_ans,axis=1)))
+          self.MTest_cos_diff.append(
+              torch.mean(CosDist(torch.FloatTensor(
+                self.OldMTestAnswers[i][0]-
+                dataset.TrainOutput.data.cpu().numpy()),
+                torch.FloatTensor(
+                  train_ans-dataset.TrainOutput.data.cpu().numpy()))))
+        self.OldMTestAnswers[i][0] = train_ans
+    set_trace()
+ 
   ##############################
   ## MAIN BOUNCEGRAD FUNCTION ##
   ##############################
@@ -582,6 +642,7 @@ class BounceGrad(object):
         self.store_simple_metrics()
         # self.store_metrics()
         if self.save_modules != '': self.save_L(self.save_modules)
+      #set_trace()
 
   #########################################
   # Logistic functions of little interest #
@@ -713,19 +774,21 @@ class BounceGrad(object):
       aux = list(enumerate(self.METRICS['NumberToWords']))
       aux.sort(key = lambda x : x[1])
       sorted_order = [_[0] for _ in aux]
-      cax = plt.gca().matshow(np.array(
+      fig = plt.figure()
+      ax = fig.gca()
+      cax = ax.matshow(np.array(
         self.METRICS['Sharing'])[sorted_order,:][:,sorted_order]
         /self.S.usage_normalization)
-      plt.gca().set_xticklabels(['']+sorted(self.METRICS['NumberToWords']))
-      plt.gca().set_yticklabels(['']+sorted(self.METRICS['NumberToWords']))
-      plt.gca().xaxis.set_major_locator(ticker.MultipleLocator(1))
-      plt.gca().yaxis.set_major_locator(ticker.MultipleLocator(1))
+      ax.set_xticklabels(['']+sorted(self.METRICS['NumberToWords']))
+      ax.set_yticklabels(['']+sorted(self.METRICS['NumberToWords']))
+      ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
+      ax.yaxis.set_major_locator(ticker.MultipleLocator(1))
       if self.store_video:
-        plt.savefig(os.path.join(self.plot_name, 'video/sharing-rate_'+
+        fig.savefig(os.path.join(self.plot_name, 'video/sharing-rate_'+
           str(self.step)))
-      plt.gcf().colorbar(cax)
-      plt.savefig(os.path.join(self.plot_name, 'sharing-rate'))
-      plt.clf()
+      fig.colorbar(cax)
+      fig.savefig(os.path.join(self.plot_name, 'sharing-rate'))
+      plt.close(fig)
 
   def log_metrics(self):
     '''
@@ -765,6 +828,7 @@ class BounceGrad(object):
         plt.savefig(os.path.join(self.plot_name,
           'video/modules_'+str(self.step)))
       plt.cla()
+    plt.close(fig)
     # Plot basic comparisons
     fig, ax = plt.subplots(nrows=3, ncols=3)
     if self.perm_sample_fns is None:
@@ -801,6 +865,7 @@ class BounceGrad(object):
       plt.savefig(os.path.join(self.plot_name,
         'video/comparisons_'+str(self.step)))
     plt.clf()
+    plt.close(fig)
 
   def update_Sharing_counters(self):
     '''

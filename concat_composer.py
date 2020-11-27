@@ -11,6 +11,7 @@ from composition import Composer
 from structure import Structure
 from variable_dimension_structure import VariableDimensionStructure
 from IPython import embed
+from pdb import set_trace
 
 class ConcatComposer(Composer):
   def __init__(self, composer, module_list, loss_fn=None, structure={},

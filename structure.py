@@ -103,10 +103,13 @@ class Structure():
 
   def plot_usage(self, directory):
     if self.Usage is not None:
-      cax = plt.gca().matshow(self.Usage/self.usage_normalization)
-      plt.gcf().colorbar(cax)
-      plt.savefig(os.path.join(directory, 'usage-rate'))
+      fig = plt.figure()
+      ax = fig.gca()
+      cax = ax.matshow(self.Usage/self.usage_normalization)
+      fig.colorbar(cax)
+      fig.savefig(os.path.join(directory, 'usage-rate'))
       plt.clf()
+      plt.close(fig)
 
   def initialize_all_structures(self, T, mtrain_copies=1):
     self.TrainStructures = [None for _ in range(mtrain_copies * T.mtrain)]
@@ -123,6 +126,15 @@ class Structure():
               T.MVAL[i].original_input_shape)
       self.ValStructures[i]['original_output_shape'] = (
               T.MVAL[i].original_output_shape)
+
+  def initialize_test_structures(self, test_data):
+    self.TestStructures = [None for _ in test_data]
+    for i in range(len(self.TestStructures)):
+      self.TestStructures[i] = self.initialize_structure()
+      self.TestStructrues[i]['original_input_shape'] = (
+              test_data[i].original_input_shape)
+      self.TestStructures[i]['original_output_shape'] = (
+              test_data[i].original_output_shape)
 
   ###########################################################
   ## Default functions                                     ##

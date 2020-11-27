@@ -2,6 +2,7 @@ import argparse
 from tensorboardX import SummaryWriter
 
 from modular_metalearning import BounceGrad
+from plot_ndim_sines import plot_ndim_sines
 
 from sum_composer import Sum_Structure
 from functioncomposition_composer import FunctionComposition_Structure
@@ -91,6 +92,12 @@ def main():
   parser.add_argument('--initial_acc', dest='initial_acc', type=float,
       default = 0, help='[log] initial acceptance ratio')
 
+  # Flag for running tests
+  parser.add_argument("--test", dest="test", action="store_true")
+  parser.add_argument("--test_steps", dest="test_steps", type=int, default=-1)
+
+  parser.add_argument("--plot_ndim_sines", dest="plot_ndim_sines", action="store_true")
+
   # Parsing args
   args = parser.parse_args()
 
@@ -122,7 +129,14 @@ def main():
     raise NotImplementedError
 
   bg = BounceGrad(S=S, args=args, tensorboardX_writer=tensorboardX_writer)
-  bg.SAConfig_SGDModules(args.optimization_steps)
+  if not args.test:
+    bg.SAConfig_SGDModules(args.optimization_steps)
+  else:
+    bg.run_test(args.test_steps)
+
+  if args.plot_ndim_sines:
+    plot_ndim_sines(bg)
+
 
 if __name__ == '__main__':
   main()
