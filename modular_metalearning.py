@@ -176,6 +176,7 @@ class BounceGrad(object):
         self.L.append(aux_nn)
       self.S.Modules.append(l)
     self.S.module_out_size = self.nn_out[0]
+    self.S.module_in_size = self.nn_inp[0]
     for out in self.nn_out:
       assert out == self.S.module_out_size
     if self.load_modules != '': self.load_L(self.load_modules)

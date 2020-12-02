@@ -114,7 +114,7 @@ class MetaDataset(object):
     #  assert dataset.TrainInput.shape[1] == inp_shape
     #  assert dataset.TestOutput.shape[1] == out_shape
     # Compute mean and std
-    ALL_IN = np.concatenate([dataset.ValInput for dataset in self.MVAL] , 0)
+    ALL_IN = np.concatenate([dataset.ValInput.flatten() for dataset in self.MVAL])
     ALL_OUT = np.concatenate([dataset.ValOutput.flatten() for dataset in self.MVAL])
     self.input_mean = np.mean(ALL_IN, 0)
     self.input_std = np.maximum(EPS, np.std(ALL_IN, 0))
@@ -125,7 +125,7 @@ class MetaDataset(object):
     print('MVAL Output mean: ', self.output_mean)
     print('MVAL Output std: ', self.output_std)
 
-    ALL_IN = np.concatenate([dataset.ValInput for dataset in self.MTRAIN] , 0)
+    ALL_IN = np.concatenate([dataset.ValInput.flatten() for dataset in self.MTRAIN])
     ALL_OUT = np.concatenate([dataset.ValOutput.flatten() for dataset in self.MTRAIN])
     self.input_mean = np.mean(ALL_IN, 0)
     self.input_std = np.maximum(EPS, np.std(ALL_IN, 0))

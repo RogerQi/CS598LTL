@@ -13,7 +13,7 @@ from variable_dimension_structure import VariableDimensionStructure
 from IPython import embed
 from pdb import set_trace
 
-class ConcatComposer(Composer):
+class MultiSumComposer(Composer):
   def __init__(self, composer, module_list, loss_fn=None, structure={},
       instructions={}):
     super().__init__(composer=composer,
@@ -24,32 +24,46 @@ class ConcatComposer(Composer):
     res = []
     # self.structure['modules'] contains a list of length n
     # where n is the number of output dimension
-    for mod in self.structure['modules']:
-      res.append(self.module_list[mod](x))
+    mod_idx = 0
+    chunk_size = self.structure["chunk_size"]
+    for i in range(self.structure["out_mods"]):
+        res_val = 0
+        for j in range(self.structure["in_mods"]):
+            mod = self.structure["modules"][mod_idx]
+            res_val += self.module_list[mod](x[:, chunk_size*j:chunk_size*(j+1)])
+            mod_idx += 1
+        res.append(res_val)
     x = torch.cat(res, dim = -1)
     return x
-
+  
   def forward_with_weights(self, x, weights):
     res = []
-    for mod in self.structure['modules']:
-      res.append(self.module_list[mod](x,
-        weights=weights, prefix='module_list.'+str(mod)+'.features.'))
+    # self.structure['modules'] contains a list of length n
+    # where n is the number of output dimension
+    mod_idx = 0
+    chunk_size = self.structure["chunk_size"]
+    for i in range(self.structure["out_mods"]):
+        res_val = 0
+        for j in range(self.structure["in_mods"]):
+            mod = self.structure["modules"][mod_idx]
+            res_val += self.module_list[mod](x[:, chunk_size*j:chunk_size*(j+1)],
+                weights=weights, prefix='module_list.'+str(mod)+'.features.')
+            mod_idx += 1
+        res.append(res_val)
     x = torch.cat(res, dim = -1)
     return x
 
-class ConcatStructure(VariableDimensionStructure):
+class MultiSumStructure(VariableDimensionStructure):
   def __init__(self, args):
-    self.composer = 'ConcatComposer'
-    self.composer_class = ConcatComposer
-    self.composer_abbreviation = 'C'
+    self.composer = 'MultiSumComposer'
+    self.composer_class = MultiSumComposer
+    self.composer_abbreviation = 'M'
     super().__init__(args=args)
 
   def propose_new_structure(self, new_structure):
     return self.default_propose_new_structure(new_structure)
 
   def initialize_structure(self, in_dim, out_dim):
-    if in_dim != self.module_in_size:
-      raise ValueError("Concat structure does not support variable input dimension")
     return self.default_initialize_structure(in_dim, out_dim)
 
   def update_Usage_counters(self, METRICS, T):

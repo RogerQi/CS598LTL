@@ -7,6 +7,7 @@ from plot_ndim_sines import plot_ndim_sines
 from sum_composer import Sum_Structure
 from functioncomposition_composer import FunctionComposition_Structure
 from multi_dimension_composer import multi_dimension_Structure
+from multi_sum_composer import MultiSumStructure
 from concat_composer import ConcatStructure
 
 def main():
@@ -125,6 +126,8 @@ def main():
     S = multi_dimension_Structure(args=args)
   elif composer.startswith("concat_composition"):
     S = ConcatStructure(args=args)
+  elif composer.startswith("multisum_composition"):
+    S = MultiSumStructure(args=args)
   else:
     raise NotImplementedError
 
