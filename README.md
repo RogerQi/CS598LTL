@@ -55,8 +55,8 @@ python3 modular_main.py --type_modules affine-1-64-64-1,affine-1-64-64-1 --num_m
 ```
 or to run the gate sum structure on the multi\_sines dataset (with separated MAML):
 ```
-python3 modular_main.py --type_modules affine-1-64-64-1,sigmoid-1-64-64-1 --num_modules 6,6 --composer gated_sum_composition --meta_lr 0.001 --plot_name MAML --limi
-t_data 80 --optimization_steps 5000 --split_by_file --meta_split 90,10,0 --data_split 20,80,0 --data_desc HDF5@multi_sines.hdf5 --meta_batch_size 16 --max_datasets 300 --MAML --MAML_step_size 0.1
+python3 modular_main.py --type_modules affine-1-64-64-1,sigmoid-1-64-64-1 --num_modules 6,6 --composer gated_sum_composition --meta_lr 0.001 --plot_name MAML --limit_data 80 --optimization_steps 5000 --split_by_file --meta_split 90,10,0 --data_split 20,80,0 --data_desc HDF5@multi_sines.hdf5 --meta_batch_size 16 --max_datasets 300 --MAML --MAML_step_size
+ 0.1 --MAML_separate
 ```
 ## Algorithm options
 You can run either of the 4 algorithms described in the paper:
