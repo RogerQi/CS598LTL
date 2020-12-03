@@ -32,6 +32,7 @@ class BounceGrad(object):
     self.MAML_loss_fn = (lambda x,y : torch.mean((x-y)**2))
     self.MAML_inner_updates = args.MAML_inner_updates
     self.MAML_step_size = args.MAML_step_size
+    self.MAML_separate = args.MAML_separate
 
     # Device
     if not torch.cuda.is_available() or args.nn_device == 'cpu':
@@ -274,7 +275,7 @@ class BounceGrad(object):
       module_list=self.L, loss_fn=None, structure=structure)
     self.fast_net = InnerLoop(baseComposer=baseComposer, module_list=self.L,
         loss_fn=self.MAML_loss_fn, num_updates=self.MAML_inner_updates,
-        step_size=self.MAML_step_size)
+        step_size=self.MAML_step_size, separate_weights=self.MAML_separate)
     self.slow_net.cuda()
     self.fast_net.copy_weights(self.slow_net)
     metrics, g = self.fast_net.forward(dataset)

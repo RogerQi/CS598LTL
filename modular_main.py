@@ -62,6 +62,8 @@ def main():
   # MAML flags
   parser.add_argument('--MAML', dest='MAML', action='store_true',
       help='MAML loss instead of conventional loss')
+  parser.add_argument('--MAML_separate', dest='MAML_separate', action='store_true',
+      help='Apply MAML loss separately to modules which are in structure multiple times')
   parser.add_argument('--MAML_inner_updates', dest='MAML_inner_updates',
       type=int, default = 5, help='number of gradient steps in the inner loop')
   parser.add_argument('--MAML_step_size', dest='MAML_step_size', type=float,

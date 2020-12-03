@@ -7,6 +7,7 @@ https://github.com/katerakelly/pytorch-maml/blob/master/src/omniglot_net.py
 from __future__ import print_function
 import torch
 from torch import nn
+from collections import OrderedDict
 torch.set_default_tensor_type('torch.cuda.FloatTensor')
 nn_device='cuda:0'
 torch.device(nn_device)
@@ -81,3 +82,22 @@ class Composer(nn.Module):
         m_to.weight.data = m_from.weight.data.clone()
         if m_to.bias is not None:
             m_to.bias.data = m_from.bias.data.clone()
+
+  def separate_module_weights(self):
+    mod_idxs = self.structure["modules"]
+    new_mod_idxs = []
+    new_mod_list = torch.nn.ModuleList()
+    separated_weights = OrderedDict()
+    for i, idx in enumerate(mod_idxs):
+        mod = self.module_list[idx]
+        new_mod_list.append(mod)
+        new_mod_idxs.append(i)
+        for name, param in mod.named_parameters():
+            new_name = "module_list.{}.{}".format(i, name)
+            separated_weights[new_name] = 1.0 * param
+    self.module_list = new_mod_list
+    new_structure = self.structure.copy()
+    new_structure["modules"] = new_mod_idxs
+    self.structure = new_structure
+    return separated_weights
+        

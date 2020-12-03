@@ -8,6 +8,7 @@ from collections import OrderedDict
 import torch
 import torch.nn as nn
 from custom_module import torch_NN
+from pdb import set_trace
 torch.set_default_tensor_type('torch.cuda.FloatTensor')
 nn_device='cuda:0'
 torch.device(nn_device)
@@ -20,11 +21,12 @@ class InnerLoop():
   then computes and returns a meta-gradient w.r.t. validation data.
   '''
   def __init__(self, baseComposer, module_list, loss_fn,
-      num_updates, step_size):
+      num_updates, step_size, separate_weights=False):
     # super(InnerLoop, self).__init__(composer=baseComposer.composer,
     #     module_list=module_list, loss_fn=loss_fn)
     #Composer, already initialized
     self.loss_fn = loss_fn
+    self.separate_weights = separate_weights
     self.C = baseComposer
     self.C.cuda()
     #Number of updates to be taken
@@ -40,13 +42,16 @@ class InnerLoop():
     # # Test net before training, should be random accuracy
     # tr_pre_loss, __ = self.evaluate(dataset.TrainInput, dataset.TrainOutput)
     # val_pre_loss, __ = self.evaluate(dataset.ValInput, dataset.ValOutput)
-    fast_weights = OrderedDict((name, param) for (name, param)
-        in self.C.named_parameters())
+    if not self.separate_weights:
+        fast_weights = OrderedDict((name, param) for (name, param)
+            in self.C.named_parameters())
+    else:
+        fast_weights = self.C.separate_module_weights()
     for i in range(self.num_updates):
       in_, target = dataset.TrainInput, dataset.TrainOutput
       if i==0:
-        loss, _ = self.forward_pass(in_, target)
-        grads = torch.autograd.grad(loss, self.C.parameters(),
+        loss, _ = self.forward_pass(in_, target, fast_weights)
+        grads = torch.autograd.grad(loss, fast_weights.values(),
             create_graph=True, allow_unused=True)
       else:
         loss, _ = self.forward_pass(in_, target, fast_weights)
