@@ -110,6 +110,28 @@ def main(args):
       DATA[ori_name+'-OUT'] = y
       #ax_counter = maybe_add_plot(ax_counter, xs,y)
 
+  def run_sines_multidim2_inout(args):
+    ax_counter = 0
+    for dataset in range(args.meta_datasets):
+      out_dim = np.random.random_integers(low = args.min_dim, high = args.max_dim)
+      in_dim = out_dim + 1
+      freqss = np.random.uniform(low = 0.1, high = 5.0, size=(out_dim, in_dim))
+      phasess = np.random.uniform(low=0., high = np.pi, size=(out_dim, in_dim))
+      xs = np.random.uniform(low=-1, high=1, size=(args.limit_data, in_dim))
+      ys = []
+      ori_names = []
+      for freqs, phases in zip(freqss, phasess):
+        y = sum([special_sine(xs[:,i], freq, phase) 
+            for i, (freq, phase) in enumerate(zip(freqs, phases))])
+        ys.append(y)
+        ori_names.append("".join(["f{:.6f}p{:.6f}".format(freq, phase).replace(".", "d")
+            for freq, phase in zip(freqs, phases)]))
+      y = np.vstack(ys).T
+      ori_name = "_".join(ori_names)
+      DATA[ori_name+'-IN'] = xs
+      DATA[ori_name+'-OUT'] = y
+      #ax_counter = maybe_add_plot(ax_counter, xs,y)
+
   def run_sines_finn_etal(args):
     # As described in https://arxiv.org/abs/1703.03400
     # Varies amplitude and phase
@@ -152,6 +174,7 @@ def main(args):
   elif args.mode == 'two_dim_sines': run_sines_two_dim(args)
   elif args.mode == "n_dim_sines" : run_sines_n_dim(args)
   elif args.mode == "multi_sines" : run_sines_multidim_inout(args)
+  elif args.mode == "multi2_sines" : run_sines_multidim2_inout(args)
   else: raise NotImplementedError
 
   print(len(DATA))

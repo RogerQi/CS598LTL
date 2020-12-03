@@ -30,13 +30,17 @@ class GatedSumComposer(Composer):
     gate_offset = len(self.structure["modules"]) // 2
     for i in range(self.structure["out_mods"]):
         res_val = 0
+        inp1 = x[:, chunk_size*i:chunk_size*(i+1)]
         for j in range(self.structure["in_mods"]):
+            if i == j:
+                continue
+            inp2 = x[:, chunk_size*j:chunk_size*(j+1)]
+            inp = torch.cat([inp1, inp2])
             mod = self.structure["modules"][mod_idx]
             gate_mod = self.structure["modules"][mod_idx+gate_offset]
-            gate_val = self.module_list[gate_mod](x[:, chunk_size*j:chunk_size*(j+1)])
+            gate_val = self.module_list[gate_mod](inp)
             assert gate_val.shape[1] == 1
-            res_val += gate_val * self.module_list[mod](x[:, 
-                chunk_size*j:chunk_size*(j+1)])
+            res_val += gate_val * self.module_list[mod](inp)
             mod_idx += 1
         res.append(res_val)
     x = torch.cat(res, dim = -1)
@@ -51,16 +55,21 @@ class GatedSumComposer(Composer):
     gate_offset = len(self.structure["modules"]) // 2
     for i in range(self.structure["out_mods"]):
         res_val = 0
-        for j in range(self.structure["in_mods"]):
+        inp1 = x[:, chunk_size*i:chunk_size*(i+1)]
+        for j in range(self.structure["in_mods"]+1):
+            if i == j:
+                continue
+            inp2 = x[:, chunk_size*j:chunk_size*(j+1)]
+            inp = torch.cat([inp1, inp2], 1)
             mod = self.structure["modules"][mod_idx]
             gate_mod = self.structure["modules"][mod_idx+gate_offset]
-            gate_val = self.module_list[gate_mod](x[:, chunk_size*j:chunk_size*(j+1)],
+            gate_val = self.module_list[gate_mod](inp,
                     weights=weights, prefix='module_list.'+str(gate_mod)
                             +'.features.')
             assert gate_val.shape[1] == 1
-            res_val += gate_val * self.module_list[mod](x[:, 
-                chunk_size*j:chunk_size*(j+1)],
+            res_val += gate_val * self.module_list[mod](inp,
                 weights=weights, prefix='module_list.'+str(mod)+'.features.')
+            set_trace()
             mod_idx += 1
         res.append(res_val)
     x = torch.cat(res, dim = -1)
@@ -86,9 +95,9 @@ class GatedSumStructure(VariableDimensionStructure):
     structure = {"modules" : []}
     if out_dim % self.module_out_size != 0:
       raise ValueError("Problem dim is not a multiple of module_out_size")
-    if in_dim % self.module_in_size != 0:
+    if in_dim % (self.module_in_size//2) != 0:
       raise ValueError("Problem input dim is not a multiple of module_in_size")
-    in_mods = in_dim // self.module_in_size
+    in_mods = in_dim // (self.module_in_size // 2) - 1
     out_mods = out_dim // self.module_out_size
     structure_size = in_mods * out_mods
     gate_mods = []
@@ -101,7 +110,7 @@ class GatedSumStructure(VariableDimensionStructure):
     structure["modules"] += gate_mods
     structure["out_mods"] = out_mods
     structure["in_mods"] = in_mods
-    structure["chunk_size"] = self.module_in_size
+    structure["chunk_size"] = self.module_in_size // 2
     return structure
 
   def update_Usage_counters(self, METRICS, T):
