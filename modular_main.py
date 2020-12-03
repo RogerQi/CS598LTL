@@ -9,6 +9,7 @@ from functioncomposition_composer import FunctionComposition_Structure
 from multi_dimension_composer import multi_dimension_Structure
 from multi_sum_composer import MultiSumStructure
 from concat_composer import ConcatStructure
+from gated_sum_composer import GatedSumStructure
 
 def main():
   #########
@@ -130,6 +131,8 @@ def main():
     S = ConcatStructure(args=args)
   elif composer.startswith("multisum_composition"):
     S = MultiSumStructure(args=args)
+  elif composer.startswith("gated_sum_composition"):
+    S = GatedSumStructure(args=args)
   else:
     raise NotImplementedError
 

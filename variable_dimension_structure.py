@@ -1,6 +1,7 @@
 import numpy as np
 from structure import Structure 
 from tqdm import tqdm as Tqdm
+from pdb import set_trace
 
 class VariableDimensionStructure(Structure):
   def default_initialize_structure(self, in_dim, out_dim):

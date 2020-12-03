@@ -152,6 +152,8 @@ class BounceGrad(object):
     '''
     self.L = nn.ModuleList() #Library of PyTorch Modules
     self.S.Modules = []
+    self.S.mod_ins = []
+    self.S.mod_outs = []
     self.nn_inp = []
     self.nn_out = []
     self.nn_hid = []
@@ -176,6 +178,8 @@ class BounceGrad(object):
         l.append(len(self.L))
         self.L.append(aux_nn)
       self.S.Modules.append(l)
+      self.S.mod_ins.append(self.nn_inp[t])
+      self.S.mod_outs.append(self.nn_out[t])
     self.S.module_out_size = self.nn_out[0]
     self.S.module_in_size = self.nn_inp[0]
     for out in self.nn_out:
