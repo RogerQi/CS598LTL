@@ -1,0 +1,11 @@
+There are 3 folders, containing data for pushings with 1,2, and 3 random objects. There are a total of 10 objects, with IDs ranging from 0-9.
+In each folder, 200 pushes are collected, each containing 3s of the trajectory with dt = 0.01s.
+In each folder, this is a summary.txt, where each line contains:
+[trajectory_number,pushing_angle,pusher_initial_position,number_of_objects,object IDs]
+
+The pose and velocities for each trajectory are saved as Klampt trajectories to pose_i.traj and vel_i.traj, where j is the trajectory number.
+You can use traj = klampt.io.loader.loadTrajectory(fn) to load each trajectory. 
+
+traj.times and traj.milestones give the timestamp and the milestones along the 3s trajectory.
+
+traj.milestones is a list of lists, with each list containing the x,y position of the pusher, the x,y,angle of each rigid object. (Therefore there would be 11 elements for 3 object pushing scenario.)
