@@ -69,7 +69,6 @@ class GatedSumComposer(Composer):
             assert gate_val.shape[1] == 1
             res_val += gate_val * self.module_list[mod](inp,
                 weights=weights, prefix='module_list.'+str(mod)+'.features.')
-            set_trace()
             mod_idx += 1
         res.append(res_val)
     x = torch.cat(res, dim = -1)
