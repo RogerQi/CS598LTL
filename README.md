@@ -1,3 +1,16 @@
+# Commands for our experiments
+Generate pushing dataset
+```
+python3 convert_pushing_dataset.py pushing.hdf5
+```
+
+Run experiment
+```
+mkdir <module_save_dir>
+time python3 modular_main.py --type_modules affine-12-64-64-3,sigmoid-12-64-64-1 --num_modules 10,10 --composer gated_sum_composition --meta_lr 0.001 --plot_name MAML --limit_data 290 --optimization_steps 5000 --split_by_file --meta_split 80,10,10 --data_split 20,80,0 --data_desc HDF5@pushing.hdf5 --meta_batch_size 16 --max_datasets 300 --MAML --MAML_step_size 0.1 --MAML_separate --MAML_inner_updates 3 --save_modules <module_save_dir>
+```
+
+
 # Modular meta-learning
 
 Code for the papers [Modular meta-learning](https://arxiv.org/abs/1806.10166) and [NRI with Fast Modular meta-learning](https://papers.nips.cc/paper/9353-neural-relational-inference-with-fast-modular-meta-learning) (in the [neurips_2019 folder](https://github.com/FerranAlet/modular-metalearning/tree/master/neurips2019))

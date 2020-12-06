@@ -6,14 +6,15 @@ from pdb import set_trace
 
 MIN_OBJECTS = 1
 MAX_OBJECTS = 3
-NUM_TRAJS_PER_SIZE = 200
+MIN_TRAJ = 0
+MAX_TRAJ = 199
 DATA_PATH = "pushing_dataset"
 
 def main(out_name):
     # Start out by loading in all data
     DATA = dict()
     for nobj in range(MIN_OBJECTS, MAX_OBJECTS+1):
-        for i in range(NUM_TRAJS_PER_SIZE):
+        for i in range(MIN_TRAJ, MAX_TRAJ+1):
             fn = os.path.join(DATA_PATH, str(nobj), 
                 "pose_{}.traj".format(i))
             traj = loadTrajectory(fn)

@@ -45,8 +45,10 @@ class InnerLoop():
     if not self.separate_weights:
         fast_weights = OrderedDict((name, param) for (name, param)
             in self.C.named_parameters())
+        orig_named_params = self.C.named_parameters()
     else:
-        fast_weights = self.C.separate_module_weights()
+        fast_weights, orig_named_params = self.C.separate_module_weights()
+    orig_params = [v for (k,v) in orig_named_params]
     for i in range(self.num_updates):
       in_, target = dataset.TrainInput, dataset.TrainOutput
       if i==0:
@@ -71,9 +73,9 @@ class InnerLoop():
     in_, target = dataset.ValInput, dataset.ValOutput
     loss = val_post_loss/self.meta_batch_size
     grads = torch.autograd.grad(loss,
-        self.C.parameters(), allow_unused=True)
+        orig_params, allow_unused=True)
     meta_grads = {name: g for ((name, _), g)
-        in zip(self.C.named_parameters(), grads)}
+        in zip(orig_named_params, grads)}
     metrics = (tr_post_loss, val_post_loss, train_ans, val_ans)
     return metrics, meta_grads
 

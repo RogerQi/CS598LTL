@@ -84,6 +84,7 @@ class Composer(nn.Module):
             m_to.bias.data = m_from.bias.data.clone()
 
   def separate_module_weights(self):
+    orig_params = self.named_parameters()
     mod_idxs = self.structure["modules"]
     new_mod_idxs = []
     new_mod_list = torch.nn.ModuleList()
@@ -99,5 +100,5 @@ class Composer(nn.Module):
     new_structure = self.structure.copy()
     new_structure["modules"] = new_mod_idxs
     self.structure = new_structure
-    return separated_weights
+    return separated_weights, orig_params
         

@@ -182,8 +182,6 @@ class BounceGrad(object):
       self.S.mod_outs.append(self.nn_out[t])
     self.S.module_out_size = self.nn_out[0]
     self.S.module_in_size = self.nn_inp[0]
-    for out in self.nn_out:
-      assert out == self.S.module_out_size
     if self.load_modules != '': self.load_L(self.load_modules)
     self.SOpt = torch.optim.Adam(self.L.parameters(), lr=self.meta_lr)
     self.SOpt_scheduler = ReduceLROnPlateau(
@@ -564,6 +562,8 @@ class BounceGrad(object):
                 value = v
                 def replace_grad(grad):
                   if key in self.dict_gradients:
+                    if self.dict_gradients[key].shape != value.shape:
+                      set_trace()
                     return self.dict_gradients[key]
                   else: return torch.zeros_like(value)
                 return replace_grad
