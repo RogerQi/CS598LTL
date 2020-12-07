@@ -15,7 +15,7 @@ def main(out_name):
     DATA = dict()
     for nobj in range(MIN_OBJECTS, MAX_OBJECTS+1):
         for i in range(MIN_TRAJ, MAX_TRAJ+1):
-            fn = os.path.join(DATA_PATH, str(nobj), 
+            fn = os.path.join(DATA_PATH, str(nobj)+"_inelastic", 
                 "pose_{}.traj".format(i))
             traj = loadTrajectory(fn)
             traj_len = len(traj.milestones)
@@ -36,11 +36,12 @@ def main(out_name):
                 fixed_angle_delta[angle_delta < -1.0] += 2*np.pi
                 inp[:, 6*j:6*j+2] = obj_xy[1:-1, :]
                 inp[:, 6*j+2:6*j+4] = obj_delta[:-1, :]
-                inp[:, 6*j+4] = np.cos(obj_angle[1:-1])
-                inp[:, 6*j+5] = np.sin(obj_angle[1:-1])
+                inp[:, 6*j+4] = obj_angle[1:-1]
+                inp[:, 6*j+5] = fixed_angle_delta[:-1]
                 out[:, 3*j:3*j+2] = obj_delta[1:, :]
                 out[:, 3*j+2] = fixed_angle_delta[1:]
             ori_name = str(nobj) + "_" + str(i)
+            set_trace()
             DATA[ori_name+"-IN"] = inp
             DATA[ori_name+"-OUT"] = out
     h = h5py.File(out_name)
