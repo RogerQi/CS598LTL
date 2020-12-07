@@ -18,6 +18,7 @@ from dataset import MetaHDFDataset, MetaNpySelfRegressDataset
 from tqdm import tqdm as Tqdm
 import os
 import shutil
+import pickle
 from IPython import embed
 
 class BounceGrad(object):
@@ -59,6 +60,7 @@ class BounceGrad(object):
     self.max_datasets = args.max_datasets
     self.data_split = [x/100 for x in map(int, args.data_split.split(','))]
     self.meta_split = [x/100 for x in map(int, args.meta_split.split(','))]
+    self.pickle_data = args.pickle_data
 
     self.load_modules = args.load_modules
     self.load_structures_and_metrics = args.load_structures_and_metrics
@@ -223,7 +225,13 @@ class BounceGrad(object):
           split_by_file=self.split_by_file,
           smaller_MVals=self.smaller_MVals,
           normalize=self.normalize_data)
+    elif self.data_source.startswith("pickle"):
+      with open(self.data_source.split('@')[1], "rb") as f:
+        self.D = pickle.load(f)
     else: assert False, self.data_source + ' hasnt been implemented yet'
+    if self.pickle_data != "":
+        with open(self.pickle_data, "wb") as f:
+            pickle.dump(self.D, f)
     self.D_mtrain = len(self.D.MTRAIN)
     self.D_mval = len(self.D.MVAL)
     self.D_mtest = len(self.D.MTEST)

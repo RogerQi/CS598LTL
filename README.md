@@ -7,7 +7,32 @@ python3 convert_pushing_dataset.py pushing.hdf5
 Run experiment
 ```
 mkdir <module_save_dir>
-time python3 modular_main.py --type_modules affine-12-64-64-3,sigmoid-12-64-64-1 --num_modules 10,10 --composer gated_sum_composition --meta_lr 0.001 --plot_name MAML --limit_data 290 --optimization_steps 5000 --split_by_file --meta_split 80,10,10 --data_split 20,80,0 --data_desc HDF5@pushing.hdf5 --meta_batch_size 16 --max_datasets 300 --MAML --MAML_step_size 0.1 --MAML_separate --MAML_inner_updates 3 --save_modules <module_save_dir>
+time python3 modular_main.py --type_modules affine-12-64-64-3,sigmoid-12-64-64-1 --num_modules 10,10 --composer gated_sum_composition --meta_lr 0.001 --plot_name MAML --limit_data 290 --optimization_steps 5000 --split_by_file --meta_split 80,10,10 --data_split 20,80,0 --data_desc pickle@pushing.pickle --meta_batch_size 16 --max_datasets 300 --MAML --MAML_step_size 0.1 --MAML_separate --MAML_inner_updates 3 --save_modules <module_save_dir>
+```
+
+# Using the pickled data
+To generate the pickled dataset add the option
+```
+--pickle_data <pickle_file>
+```
+To use the pickled data for with modular meta-learning, use the data\_desc argument
+```
+--data_desc pickle@<pickle_file>
+```
+To load the pickle in another script, you must import `MetaHDFDataset` from `dataset.py`
+The dataset object can then be used as follows:
+```
+metadataset.MTRAIN    # Meta-training set, list of datasets
+metadataset.MVAL      # Meta-validation set, list of datasets
+metadataset.MTEST     # Meta-validation set, list of datasets
+metadataset.MTEST     # Meta-validation set, list of datasets
+dataset = metadataset.MTRAIN[0]
+dataset.TrainInput    # Input for training set
+dataset.TrainOutput   # Output for training set
+dataset.ValInput      # Input for validation set
+dataset.ValOutput     # Output for validation set
+dataset.TestInput     # Input for testing set (empty in our datasets)
+dataset.TestOutput    # Output for testing set (empty in our datasets)
 ```
 
 

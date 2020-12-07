@@ -22,6 +22,8 @@ def main():
   # Data flags
   parser.add_argument('--data_desc', dest='data_desc',
       help='description of data source')
+  parser.add_argument('--pickle_data', dest="pickle_data",
+      help='Save the meta-dataset in a pickle', default="", type=str)
   parser.add_argument('--limit_data', dest='limit_data', type=int,
       help='maximum number of points per dataset', default=10000)
   parser.add_argument('--max_datasets', dest='max_datasets', type=int,

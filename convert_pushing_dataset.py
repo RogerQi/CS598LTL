@@ -41,7 +41,6 @@ def main(out_name):
                 out[:, 3*j:3*j+2] = obj_delta[1:, :]
                 out[:, 3*j+2] = fixed_angle_delta[1:]
             ori_name = str(nobj) + "_" + str(i)
-            set_trace()
             DATA[ori_name+"-IN"] = inp
             DATA[ori_name+"-OUT"] = out
     h = h5py.File(out_name)
