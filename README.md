@@ -7,7 +7,7 @@ python3 convert_pushing_dataset.py pushing.hdf5
 Run experiment
 ```
 mkdir <module_save_dir>
-time python3 modular_main.py --type_modules affine-12-64-64-3,sigmoid-12-64-64-1 --num_modules 10,10 --composer gated_sum_composition --meta_lr 0.001 --plot_name MAML --limit_data 290 --optimization_steps 5000 --split_by_file --meta_split 80,10,10 --data_split 20,80,0 --data_desc pickle@pushing.pickle --meta_batch_size 16 --max_datasets 300 --MAML --MAML_step_size 0.1 --MAML_separate --MAML_inner_updates 3 --save_modules <module_save_dir>
+time python3 modular_main.py --type_modules affine-12-64-64-3,sigmoid-12-64-64-1 --num_modules 10,10 --composer gated_sum_composition --meta_lr 0.001 --plot_name MAML --limit_data 290 --optimization_steps 2000 --split_by_file --meta_split 80,10,10 --data_split 20,80,0 --data_desc pickle@pushing.pickle --meta_batch_size 16 --max_datasets 300 --MAML --MAML_step_size 0.1 --MAML_separate --MAML_inner_updates 3 --save_modules <module_save_dir>
 ```
 
 # Using the pickled data
