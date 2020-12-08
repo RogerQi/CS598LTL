@@ -3,6 +3,7 @@ from tensorboardX import SummaryWriter
 
 from modular_metalearning import BounceGrad
 from plot_ndim_sines import plot_ndim_sines
+from plot_pushing_error import plot_pushing_error
 
 from sum_composer import Sum_Structure
 from functioncomposition_composer import FunctionComposition_Structure
@@ -103,6 +104,8 @@ def main():
   parser.add_argument("--test_steps", dest="test_steps", type=int, default=-1)
 
   parser.add_argument("--plot_ndim_sines", dest="plot_ndim_sines", action="store_true")
+  parser.add_argument("--plot_pushing_error", dest="plot_pushing_error", 
+          action="store_true")
 
   # Parsing args
   args = parser.parse_args()
@@ -146,6 +149,8 @@ def main():
 
   if args.plot_ndim_sines:
     plot_ndim_sines(bg)
+  elif args.plot_pushing_error:
+    plot_pushing_error(bg)
 
 
 if __name__ == '__main__':

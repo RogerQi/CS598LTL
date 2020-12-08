@@ -38,7 +38,7 @@ class InnerLoop():
   def net_forward(self, x, weights=None):
     return self.C.forward(x, weights)
 
-  def forward(self, dataset):
+  def forward(self, dataset, ret_weights=False):
     # # Test net before training, should be random accuracy
     # tr_pre_loss, __ = self.evaluate(dataset.TrainInput, dataset.TrainOutput)
     # val_pre_loss, __ = self.evaluate(dataset.ValInput, dataset.ValOutput)
@@ -77,7 +77,10 @@ class InnerLoop():
     meta_grads = {name: g for ((name, _), g)
         in zip(orig_named_params, grads)}
     metrics = (tr_post_loss, val_post_loss, train_ans, val_ans)
-    return metrics, meta_grads
+    if not ret_weights:
+        return metrics, meta_grads
+    else:
+        return metrics, meta_grads, fast_weights
 
   def forward_pass(self, in_, target, weights=None):
     ''' Run data through net, return loss and output '''

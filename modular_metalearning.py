@@ -272,7 +272,7 @@ class BounceGrad(object):
   ###                                 ###
   #######################################
 
-  def run_MAML(self, structure, dataset):
+  def run_MAML(self, structure, dataset, ret_weights=False):
     '''
     Run MAML of structure 'structure' on 'dataset'.
 
@@ -288,9 +288,15 @@ class BounceGrad(object):
         step_size=self.MAML_step_size, separate_weights=self.MAML_separate)
     self.slow_net.cuda()
     self.fast_net.copy_weights(self.slow_net)
-    metrics, g = self.fast_net.forward(dataset)
+    if not ret_weights:
+        metrics, g = self.fast_net.forward(dataset)
+    else:
+        metrics, g, weights = self.fast_net.forward(dataset, ret_weights=True)
     (train_loss, val_loss, train_ans, val_ans) = metrics
-    return train_loss, val_loss, train_ans, val_ans, g
+    if not ret_weights:
+        return train_loss, val_loss, train_ans, val_ans, g
+    else:
+        return train_loss, val_loss, train_ans, val_ans, g, weights, baseComposer
 
   def run_model(self, structure, inp, instructions={}):
     '''
@@ -398,7 +404,7 @@ class BounceGrad(object):
           original_val_ans.data.cpu().numpy(), MAML_g)
 
   def run_test(self, sa_steps):
-    test_data = self.T.MVAL
+    test_data = self.T.MTEST
     self.SA_running_acc_rate = 1e-9 #initial counters for Simulated Annealing
     self.SA_running_factor = 1e-9 #normalizing constant
     temp = np.exp(self.initial_temp) #temperature in the SA formula
@@ -453,7 +459,6 @@ class BounceGrad(object):
                 torch.FloatTensor(
                   train_ans-dataset.TrainOutput.data.cpu().numpy()))))
         self.OldMTestAnswers[i][0] = train_ans
-    set_trace()
  
   ##############################
   ## MAIN BOUNCEGRAD FUNCTION ##
