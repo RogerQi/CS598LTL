@@ -1,9 +1,10 @@
 import argparse
 from tensorboardX import SummaryWriter
+import pickle
 
 from modular_metalearning import BounceGrad
 from plot_ndim_sines import plot_ndim_sines
-from plot_pushing_error import plot_pushing_error
+from plot_pushing_error import plot_pushing_error, save_predicted_trajs
 
 from sum_composer import Sum_Structure
 from functioncomposition_composer import FunctionComposition_Structure
@@ -102,10 +103,16 @@ def main():
   # Flag for running tests
   parser.add_argument("--test", dest="test", action="store_true")
   parser.add_argument("--test_steps", dest="test_steps", type=int, default=-1)
+  parser.add_argument("--save_test_structures", dest="save_test_structures", 
+          type=str, default="")
+  parser.add_argument("--load_test_structures", dest="load_test_structures", 
+          type=str, default="")
 
   parser.add_argument("--plot_ndim_sines", dest="plot_ndim_sines", action="store_true")
   parser.add_argument("--plot_pushing_error", dest="plot_pushing_error", 
           action="store_true")
+  parser.add_argument("--save_predicted_trajs", dest="save_predicted_trajs", 
+          type=str, default="")
 
   # Parsing args
   args = parser.parse_args()
@@ -145,12 +152,23 @@ def main():
   if not args.test:
     bg.SAConfig_SGDModules(args.optimization_steps)
   else:
-    bg.run_test(args.test_steps)
+    if not args.load_test_structures:
+      bg.run_test(args.test_steps)
+    else:
+      with open(args.load_test_structures, "rb") as f:
+        bg.S.TestStructures = pickle.load(f)
+    if args.save_test_structures:
+      with open(args.save_test_structures, "wb") as f:
+        pickle.dump(bg.S.TestStructures, f)
 
   if args.plot_ndim_sines:
     plot_ndim_sines(bg)
-  elif args.plot_pushing_error:
+
+  if args.plot_pushing_error:
     plot_pushing_error(bg)
+
+  if args.save_predicted_trajs:
+    save_predicted_trajs(bg, out_dir=args.save_predicted_trajs)
 
 
 if __name__ == '__main__':

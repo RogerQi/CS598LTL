@@ -459,6 +459,8 @@ class BounceGrad(object):
                 torch.FloatTensor(
                   train_ans-dataset.TrainOutput.data.cpu().numpy()))))
         self.OldMTestAnswers[i][0] = train_ans
+      print("temp={:.4f}, train_loss={:.4f}, val_loss={:.4f}".format(temp,
+          np.mean(self.current_train), np.mean(self.current_val)))
  
   ##############################
   ## MAIN BOUNCEGRAD FUNCTION ##
