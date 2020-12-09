@@ -9,6 +9,10 @@ Run experiment
 mkdir <module_save_dir>
 time python3 modular_main.py --type_modules affine-12-64-64-3,sigmoid-12-64-64-1 --num_modules 10,10 --composer gated_sum_composition --meta_lr 0.001 --plot_name MAML --limit_data 290 --optimization_steps 2000 --split_by_file --meta_split 80,10,10 --data_split 20,80,0 --data_desc pickle@pushing.pickle --meta_batch_size 16 --max_datasets 300 --MAML --MAML_step_size 0.1 --MAML_separate --MAML_inner_updates 3 --save_modules <module_save_dir>
 ```
+To run the test phase and visualization for the experiment, use the following command.  Note that to run the test phase for a different experiment, every option prior to `--MAML_step_size` should be made identical to the original experiment.  You can play with the number of MAML updates, and the number of simulated annealing steps (controlled by `--test_steps`).
+```
+python3 modular_main.py --type_modules affine-12-64-64-3,sigmoid-12-64-64-1 --num_modules 10,10 --composer gated_sum_composition --meta_lr 0.001 --plot_name MAML --limit_data 290 --optimization_steps 5000 --split_by_file --meta_split 80,10,10 --data_split 20,80,0 --data_desc pickle@pushing.pickle --meta_batch_size 16 --max_datasets 300 --MAML --MAML_step_size 0.1 --MAML_separate --MAML_inner_updates 10 --load_modules <module_path> --test --test_steps 100 --plot_pushing_error
+```
 
 # Using the pickled data
 To generate the pickled dataset add the option
